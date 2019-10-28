@@ -14,7 +14,6 @@
 
 (defn- get-sentence [sentence-lines]
   {:label (first (string/split (first sentence-lines) #"\t"))
-   :sentence-id (str (java.util.UUID/randomUUID))
    :sentence (second sentence-lines)})
 
 (defn- get-sentences [lines]
@@ -24,15 +23,32 @@
       (conj (get-sentences (rest (second first-and-rest)))
             (get-sentence (first first-and-rest))))))
 
-(defn- store-sentence [sentence]
-  (db/put-item :table-name table-name
-            :item sentence))
+(defn- get-sentence-ids [num-sentences]
+  (map str (take num-sentences (repeat (java.util.UUID/randomUUID)))))
 
-(defn store-all-sentences [filenames]
+(defn- get-next-sentence-ids [sentence-ids]
+  (conj (vec (rest sentence-ids)) (first sentence-ids)))
+
+(defn- get-sentences-with-ids [sentences]
+  (let [sentence-ids (get-sentence-ids (count sentences))
+        next-sentence-ids (get-next-sentence-ids sentence-ids)]
+    (map (fn [sentence sentence-id next-sentence-id]
+           (assoc sentence 
+                  :sentence-id sentence-id 
+                  :next-sentence-id next-sentence-id))
+         sentences
+         sentence-ids
+         next-sentence-ids)))
+
+(defn- store-sentence! [sentence]
+  (db/put-item :table-name table-name
+               :item sentence))
+
+(defn store-all-sentences! [filenames]
   (map (fn [filename]
          (map (fn [sentence] 
                 (Thread/sleep (/ 1000 table-writes-per-second))
-                (store-sentence sentence))
-              (get-sentences (get-lines filename))))
+                (store-sentence! sentence))
+              (get-sentences-with-ids (get-sentences (get-lines filename)))))
        filenames))
 
