@@ -24,7 +24,7 @@
             (get-sentence (first first-and-rest))))))
 
 (defn- get-sentence-ids [num-sentences]
-  (map str (take num-sentences (repeat (java.util.UUID/randomUUID)))))
+  (repeatedly num-sentences #(str (java.util.UUID/randomUUID))))
 
 (defn- get-next-sentence-ids [sentence-ids]
   (conj (vec (rest sentence-ids)) (first sentence-ids)))
