@@ -5,4 +5,5 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [amazonica "0.3.147"]]
-  :repl-options {:init-ns nlp-benchmark-utils.core})
+  :repl-options {:init-ns nlp-benchmark-utils.core}
+  :plugins [[lein-cljfmt "0.6.4"]])
